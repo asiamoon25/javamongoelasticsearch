@@ -13,7 +13,7 @@
 - ### elasticsearch: 7.10.1
 - ### kibana: 7.10.1
 
-__이렇게 한 이유 : elasticsearch 와 kibana는 항상 버전을 맞춰줘야함. 그리고 7.10.1 버전 부터 보안 관련 부분인 무료 지원을 해준다.__
+__이렇게 한 이유 : elasticsearch 와 kibana는 항상 버전을 맞춰줘야함. 그리고 7.x.x 버전 부터 보안 관련 부분인 무료 지원을 해준다.__
 
 
 ### docker-compose.yml 꼬라지
