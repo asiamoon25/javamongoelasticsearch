@@ -1,0 +1,18 @@
+mongo-url = "mongodb://mongo1:27017,mongo2:27017/dbname?replicaSet=replication"
+elasticsearch-urls = ["http://elasticsearch:9200"]
+direct-read-namespaces = [ "db.collection", "test.test"] # 기존 구성되어있던 mongo에서 복사할 콜렉션
+dropped-collections = false
+dropped-databases = false
+resume = false
+resume-write-unsafe = true
+index-as-update = true
+index-oplog-time = true
+verbose = true
+
+[[script]]    # ES index명 설정
+script = """
+module.exports = function(doc, ns) {
+    doc._meta_monstache = { index: ns.replace(".","-") };
+    return doc;
+}
+"""

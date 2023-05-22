@@ -1,0 +1,92 @@
+version: '3'
+services:
+  elasticsearch:
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+    networks:
+      - monstache-network
+
+  kibana:
+    restart: always
+    image: docker.elastic.co/kibana/kibana:7.10.1
+    expose:
+      - 5601
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    environment:
+      - SERVER_PORT=5601
+      - SERVER_NAME=kibana.example.org
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - monstache-network
+
+  monstache:
+    restart: always
+    image: rwynn/monstache:rel6
+    command: -f ./config.toml &
+    volumes:
+      - ./config/config.toml:/config.toml
+    depends_on:
+      - elasticsearch
+      - mongodb1
+      - mongodb2
+    links:
+      - elasticsearch
+    ports:
+      - "8080:8080"
+    networks:
+      - monstache-network
+
+  mongodb1:
+    restart: always
+    image: mongo:latest
+    container_name: mongo1
+    expose:
+      - "27017"
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongodb/db1:/data/db
+    command: mongod --replSet rp0
+    networks:
+      - monstache-network
+
+  mongodb2:
+    restart: always
+    image: mongo:latest
+    container_name: mongo2
+    expose:
+      - "27017"
+    ports:
+      - "27019:27017"
+    volumes:
+      - ./mongodb/db2:/data/db
+    command: mongod --replSet rp0
+    depends_on:
+      - mongodb1
+    networks:
+      - monstache-network
+
+  mongosetup:
+    image: "setup-rspl:latest"
+    depends_on:
+      - mongodb1
+    networks:
+      - monstache-network
+
+networks:
+  monstache-network:
